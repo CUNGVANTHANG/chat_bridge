@@ -170,8 +170,31 @@ async function runAIFlow(prompt, attachments) {
   const provider = getActiveProvider(config);
   bglog('→ start runAIFlow for provider:', provider.name, 'prompt:', prompt);
 
+  // Save currently active tab in order to return back later
+  let originalActiveTabId = null;
+  try {
+    const activeTabs = await new Promise(resolve => {
+      chrome.tabs.query({ active: true, currentWindow: true }, resolve);
+    });
+    if (activeTabs && activeTabs.length > 0) {
+      originalActiveTabId = activeTabs[0].id;
+    }
+  } catch (e) {
+    bglog('→ failed to query original active tab:', e);
+  }
+
   const tab = await findOrCreateTab(provider);
   bglog('→ using tab:', tab.id, tab.url);
+
+  // Activate the AI tab to prevent browser throttling
+  try {
+    await new Promise(resolve => {
+      chrome.tabs.update(tab.id, { active: true }, resolve);
+    });
+    bglog('→ activated AI tab to prevent background throttling:', tab.id);
+  } catch (e) {
+    bglog('→ failed to activate AI tab:', e);
+  }
 
   await waitForLoad(tab.id);
   bglog('→ page loaded');
@@ -232,8 +255,24 @@ async function runAIFlow(prompt, attachments) {
   bglog('→ prompt sent');
 
   // 3. Wait for response
-  const reply = await waitForResponse(tab.id, provider, initialCount);
-  bglog('→ response received');
+  let reply = '';
+  try {
+    reply = await waitForResponse(tab.id, provider, initialCount);
+    bglog('→ response received');
+  } finally {
+    // Restore the user's original active tab if they were switched
+    if (originalActiveTabId && originalActiveTabId !== tab.id) {
+      try {
+        await new Promise(resolve => {
+          chrome.tabs.update(originalActiveTabId, { active: true }, resolve);
+        });
+        bglog('→ restored original active tab:', originalActiveTabId);
+      } catch (e) {
+        bglog('→ failed to restore original active tab:', e);
+      }
+    }
+  }
+
   return reply;
 }
 
