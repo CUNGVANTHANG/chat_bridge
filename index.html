@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Chat Bridge — Chat Client</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070c17;
+      --chat-bg: rgba(13, 22, 43, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%);
+      --accent-hover: linear-gradient(135deg, #818cf8 0%, #60a5fa 100%);
+      --user-bubble: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+      --ai-bubble: rgba(255, 255, 255, 0.04);
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --success: #10b981;
+      --danger: #ef4444;
+      --font-main: 'Outfit', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.06) 0px, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text);
+      font-family: var(--font-main);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    .chat-window {
+      width: 100%;
+      max-width: 800px;
+      height: 90vh;
+      background: var(--chat-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Chat Header */
+    .chat-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(10, 15, 30, 0.4);
+    }
+
+    .header-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-logo {
+      width: 36px;
+      height: 36px;
+      background: var(--accent);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 18px;
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+    }
+
+    .header-title h1 {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+    }
+
+    .header-title p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .server-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .server-status.checking {
+      color: var(--text-muted);
+    }
+
+    .server-status.online {
+      color: var(--success);
+      background: rgba(16, 185, 129, 0.08);
+    }
+
+    .server-status.offline {
+      color: var(--danger);
+      background: rgba(239, 68, 68, 0.08);
+    }
+
+    .server-status .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* Messages Area */
+    .chat-messages {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      scroll-behavior: smooth;
+    }
+
+    /* Scrollbar */
+    .chat-messages::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .chat-messages::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .chat-messages::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 99px;
+    }
+
+    /* Message Bubbles */
+    .message-row {
+      display: flex;
+      width: 100%;
+    }
+
+    .message-row.user {
+      justify-content: flex-end;
+    }
+
+    .message-row.ai {
+      justify-content: flex-start;
+    }
+
+    .bubble {
+      max-width: 75%;
+      padding: 14px 18px;
+      border-radius: 16px;
+      font-size: 15px;
+      line-height: 1.5;
+      position: relative;
+      word-wrap: break-word;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .message-row.user .bubble {
+      background: var(--user-bubble);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .message-row.ai .bubble {
+      background: var(--ai-bubble);
+      color: var(--text);
+      border-bottom-left-radius: 4px;
+      border: 1px solid var(--card-border);
+    }
+
+    /* Typing/Loading indicator inside AI bubble */
+    .typing-indicator {
+      display: flex;
+      gap: 4px;
+      padding: 6px 0;
+      align-items: center;
+    }
+
+    .typing-dot {
+      width: 6px;
+      height: 6px;
+      background-color: var(--text-muted);
+      border-radius: 50%;
+      animation: bounce 1.4s infinite ease-in-out both;
+    }
+
+    .typing-dot:nth-child(1) {
+      animation-delay: -0.32s;
+    }
+
+    .typing-dot:nth-child(2) {
+      animation-delay: -0.16s;
+    }
+
+    @keyframes bounce {
+
+      0%,
+      80%,
+      100% {
+        transform: scale(0);
+      }
+
+      40% {
+        transform: scale(1.0);
+      }
+    }
+
+    /* Input Area */
+    .chat-input-area {
+      padding: 20px 24px;
+      border-top: 1px solid var(--card-border);
+      background: rgba(10, 15, 30, 0.3);
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .input-wrapper {
+      flex: 1;
+      position: relative;
+    }
+
+    .chat-input {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: inherit;
+      padding: 14px 18px;
+      font-size: 15px;
+      outline: none;
+      transition: all 0.2s ease;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .chat-input:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.2);
+      background: rgba(15, 23, 42, 0.95);
+    }
+
+    .send-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 24px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 90px;
+    }
+
+    .send-btn:hover:not(:disabled) {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(99, 102, 241, 0.45);
+    }
+
+    .send-btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .send-btn:disabled {
+      background: #1e293b;
+      color: var(--text-muted);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="chat-window">
+    <!-- Header -->
+    <div class="chat-header">
+      <div class="header-info">
+        <div class="header-logo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+          </svg>
+        </div>
+        <div class="header-title">
+          <h1>AI Chat Bridge</h1>
+          <p id="providerSubtitle">Direct HTTP Bridge Chat Client</p>
+        </div>
+      </div>
+
+      <div id="statusBadge" class="server-status checking">
+        <span class="dot"></span>
+        <span id="statusText">Connecting...</span>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="chat-messages" id="messagesContainer">
+      <!-- Welcome message -->
+
+    </div>
+
+    <!-- Input -->
+    <div class="chat-input-area">
+      <div class="input-wrapper">
+        <input type="text" id="messageInput" class="chat-input" placeholder="Type your message..."
+          autocomplete="off" disabled />
+      </div>
+      <button id="sendBtn" class="send-btn" disabled>Send</button>
+    </div>
+  </div>
+
+  <script src="providers.js"></script>
+  <script>
+    const messagesContainer = document.getElementById('messagesContainer');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const statusBadge = document.getElementById('statusBadge');
+    const statusText = document.getElementById('statusText');
+    const providerSubtitle = document.getElementById('providerSubtitle');
+
+    let API_ENDPOINT = 'http://localhost:8765/gemini';
+    let BRIDGE_BASE = 'http://localhost:8765';
+
+    // Load config for bridge URL and provider name
+    async function initConfig() {
+      try {
+        const config = await loadConfig();
+        const provider = getActiveProvider(config);
+        BRIDGE_BASE = config.bridgeUrl || 'http://localhost:8765';
+        API_ENDPOINT = `${BRIDGE_BASE}/gemini`;
+        providerSubtitle.textContent = `Bridge → ${provider.name}`;
+        messageInput.placeholder = `Message ${provider.name}...`;
+      } catch (e) {
+        console.warn('Failed to load config:', e);
+      }
+    }
+
+    // 1. Check Server Connection Status on startup
+    async function checkConnection() {
+      try {
+        const res = await fetch(BRIDGE_BASE + '/', { method: 'GET' }).catch(() => null);
+        if (res) {
+          statusBadge.className = 'server-status online';
+          statusText.textContent = 'Active Bridge';
+          messageInput.disabled = false;
+          sendBtn.disabled = false;
+          messageInput.focus();
+        } else {
+          throw new Error('Offline');
+        }
+      } catch (e) {
+        statusBadge.className = 'server-status offline';
+        statusText.textContent = 'Server Offline';
+        messageInput.disabled = true;
+        sendBtn.disabled = true;
+        messageInput.placeholder = 'Run "node http-server.js" to connect...';
+      }
+    }
+
+    // Init config first, then start checking
+    initConfig().then(() => {
+      checkConnection();
+      setInterval(checkConnection, 4000);
+    });
+
+    // 2. Append Chat Bubbles
+    function appendMessage(text, isUser = false) {
+      const row = document.createElement('div');
+      row.className = `message-row ${isUser ? 'user' : 'ai'}`;
+
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      bubble.textContent = text;
+
+      row.appendChild(bubble);
+      messagesContainer.appendChild(row);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      return bubble;
+    }
+
+    // 3. Send Prompt Logic
+    async function sendMessage() {
+      const text = messageInput.value.trim();
+      if (!text) return;
+
+      // Clear input
+      messageInput.value = '';
+      messageInput.focus();
+
+      // Append user message
+      appendMessage(text, true);
+
+      // Append temporary loading AI bubble
+      const aiRow = document.createElement('div');
+      aiRow.className = 'message-row ai';
+      const aiBubble = document.createElement('div');
+      aiBubble.className = 'bubble';
+
+      const loader = document.createElement('div');
+      loader.className = 'typing-indicator';
+      loader.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+
+      aiBubble.appendChild(loader);
+      aiRow.appendChild(aiBubble);
+      messagesContainer.appendChild(aiRow);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+      // Lock UI during execution
+      messageInput.disabled = true;
+      sendBtn.disabled = true;
+
+      try {
+        const response = await fetch(API_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ prompt: text })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Server returned HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        const reply = data.choices?.[0]?.message?.content || data.reply || data.response || JSON.stringify(data);
+
+        // Update loading bubble with actual text
+        aiBubble.removeChild(loader);
+        aiBubble.textContent = reply;
+      } catch (err) {
+        aiBubble.removeChild(loader);
+        aiBubble.style.color = 'var(--danger)';
+        aiBubble.textContent = `Connection error: ${err.message}. Please verify "node http-server.js" is running and the AI Chat Bridge extension is active.`;
+      } finally {
+        messageInput.disabled = false;
+        sendBtn.disabled = false;
+        messageInput.focus();
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+    }
+
+    // 4. Listeners
+    sendBtn.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "AI Chat Bridge",
+  "description": "Universal bridge to control any AI chat interface (Gemini, ChatGPT, Claude, Grok, DeepSeek, etc.) via HTTP API.",
+  "version": "2.0.0",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": [
+    "tabs",
+    "scripting",
+    "storage",
+    "clipboardRead",
+    "clipboardWrite"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "bridge-shell.html",
+        "shell.js",
+        "settings.html",
+        "settings.js",
+        "settings.css",
+        "providers.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
+  "icons": {
+    "16": "icon.png",
+    "32": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+  "action": {
+    "default_icon": "icon.png",
+    "default_title": "AI Chat Bridge Settings"
+  }
+}

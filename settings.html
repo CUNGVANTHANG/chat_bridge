@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Chat Bridge — Settings</title>
+  <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+  <div class="app-container">
+
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+        </svg>
+      </div>
+      <h1>AI Chat Bridge</h1>
+      <p class="subtitle">Configure your AI provider and bridge settings</p>
+      <div class="active-provider-badge" id="activeProviderBadge">
+        <span class="dot"></span>
+        <span id="activeProviderName">Loading...</span>
+      </div>
+    </header>
+
+    <!-- 1. Provider Selection -->
+    <section class="card" id="providerCard">
+      <div class="card-header">
+        <div class="card-icon blue">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 8V4H8"/>
+            <rect width="16" height="12" x="4" y="8" rx="2"/>
+            <path d="M2 14h2"/><path d="M20 14h2"/>
+            <path d="M15 13v2"/><path d="M9 13v2"/>
+          </svg>
+        </div>
+        <div>
+          <div class="card-title">AI Provider</div>
+          <div class="card-subtitle">Choose a preset or configure a custom AI chat interface</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="providerSelect">Active Provider</label>
+        <select class="form-select" id="providerSelect">
+          <option value="gemini">Google Gemini</option>
+          <option value="chatgpt">ChatGPT</option>
+          <option value="claude">Claude (Anthropic)</option>
+          <option value="grok">Grok (xAI)</option>
+          <option value="deepseek">DeepSeek</option>
+          <option value="custom">Custom Provider</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="providerUrl">Chat URL</label>
+          <input type="text" class="form-input" id="providerUrl" placeholder="https://chatgpt.com/">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="providerUrlPattern">URL Pattern <span class="hint">(for finding open tabs)</span></label>
+          <input type="text" class="form-input" id="providerUrlPattern" placeholder="https://chatgpt.com/*">
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. CSS Selectors -->
+    <section class="card" id="selectorsCard">
+      <div class="card-header">
+        <div class="card-icon purple">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <circle cx="12" cy="12" r="6"/>
+            <circle cx="12" cy="12" r="2"/>
+          </svg>
+        </div>
+        <div>
+          <div class="card-title">CSS Selectors</div>
+          <div class="card-subtitle">Define how the bridge interacts with the AI chat page</div>
+        </div>
+      </div>
+
+      <!-- Input Selectors -->
+      <div class="form-group">
+        <label class="form-label" for="inputSelector">Input Field Selector <span class="hint">(the text input/textarea)</span></label>
+        <div class="selector-field">
+          <input type="text" class="form-input" id="inputSelector" placeholder="div[contenteditable='true'], textarea">
+          <button class="btn btn-test" data-target="inputSelector" title="Test this selector on the active AI tab">Test</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="sendButtonSelector">Send Button Selector</label>
+        <div class="selector-field">
+          <input type="text" class="form-input" id="sendButtonSelector" placeholder="button[aria-label='Send']">
+          <button class="btn btn-test" data-target="sendButtonSelector" title="Test this selector">Test</button>
+        </div>
+      </div>
+
+      <hr class="section-divider">
+
+      <div class="form-group">
+        <label class="form-label" for="responseContainerSelector">Response Container Selector <span class="hint">(each AI response block)</span></label>
+        <div class="selector-field">
+          <input type="text" class="form-input" id="responseContainerSelector" placeholder=".model-response, .message-content">
+          <button class="btn btn-test" data-target="responseContainerSelector" title="Test this selector">Test</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="responseTextSelector">Response Text Selector <span class="hint">(text elements inside response)</span></label>
+        <div class="selector-field">
+          <input type="text" class="form-input" id="responseTextSelector" placeholder="p, li, pre code">
+          <button class="btn btn-test" data-target="responseTextSelector" title="Test this selector">Test</button>
+        </div>
+      </div>
+
+      <hr class="section-divider">
+
+      <div class="form-group">
+        <label class="form-label" for="typingIndicatorSelector">Typing/Loading Indicator <span class="hint">(visible while AI is generating)</span></label>
+        <div class="selector-field">
+          <input type="text" class="form-input" id="typingIndicatorSelector" placeholder="button[aria-label*='Stop'], .typing-indicator">
+          <button class="btn btn-test" data-target="typingIndicatorSelector" title="Test this selector">Test</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="doneIndicatorSelector">Done Indicator <span class="hint">(appears when response is complete)</span></label>
+        <div class="selector-field">
+          <input type="text" class="form-input" id="doneIndicatorSelector" placeholder="button[aria-label='Copy'], .response-actions">
+          <button class="btn btn-test" data-target="doneIndicatorSelector" title="Test this selector">Test</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Behavior Settings -->
+    <section class="card" id="behaviorCard">
+      <div class="card-header">
+        <div class="card-icon emerald">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </div>
+        <div>
+          <div class="card-title">Behavior</div>
+          <div class="card-subtitle">How the bridge sends prompts and reads responses</div>
+        </div>
+      </div>
+
+      <div class="form-row-3">
+        <div class="form-group">
+          <label class="form-label" for="sendMethod">Send Method</label>
+          <select class="form-select" id="sendMethod">
+            <option value="button">Click Send Button</option>
+            <option value="enter">Press Enter Key</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="inputMethod">Input Method</label>
+          <select class="form-select" id="inputMethod">
+            <option value="clipboard">Clipboard Paste</option>
+            <option value="innerText">Set innerText</option>
+            <option value="value">Set .value</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="inputType">Input Type</label>
+          <select class="form-select" id="inputType">
+            <option value="contenteditable">contenteditable div</option>
+            <option value="textarea">textarea</option>
+            <option value="input">input</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="settleTime">Settle Time (ms) <span class="hint">(wait after response stabilizes)</span></label>
+          <input type="number" class="form-input" id="settleTime" placeholder="3500" min="500" max="30000" step="500">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="timeout">Timeout (ms) <span class="hint">(max wait for response)</span></label>
+          <input type="number" class="form-input" id="timeout" placeholder="60000" min="5000" max="300000" step="1000">
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Bridge Connection -->
+    <section class="card" id="bridgeCard">
+      <div class="card-header">
+        <div class="card-icon amber">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="card-title">Bridge Connection</div>
+          <div class="card-subtitle">HTTP bridge server settings</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="bridgeUrl">Bridge Server URL</label>
+        <input type="text" class="form-input" id="bridgeUrl" placeholder="http://localhost:8765">
+      </div>
+
+      <div class="quick-links">
+        <a class="quick-link" id="openShellBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/>
+          </svg>
+          Open Bridge Shell
+        </a>
+        <a class="quick-link" id="openAiTabBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/>
+          </svg>
+          Open AI Chat Tab
+        </a>
+      </div>
+    </section>
+
+    <!-- 5. Actions -->
+    <section class="card" id="actionsCard">
+      <div class="btn-group">
+        <button class="btn btn-primary" id="saveBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/>
+            <path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/>
+          </svg>
+          Save Configuration
+        </button>
+        <button class="btn btn-success" id="testAllBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+            <polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/>
+          </svg>
+          Test All Selectors
+        </button>
+        <button class="btn btn-ghost" id="resetBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            <path d="M3 3v5h5"/>
+          </svg>
+          Reset to Preset Defaults
+        </button>
+      </div>
+
+      <hr class="section-divider">
+
+      <div class="collapsible-header" id="importExportToggle">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+            <path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>
+          </svg>
+          <span style="font-weight:600;font-size:0.9rem;">Import / Export Configuration</span>
+        </div>
+        <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m6 9 6 6 6-6"/>
+        </svg>
+      </div>
+      <div class="collapsible-body" id="importExportBody">
+        <div style="padding-top:16px;">
+          <div class="form-group">
+            <label class="form-label">Current Configuration (JSON)</label>
+            <div class="json-preview" id="jsonPreview"></div>
+          </div>
+          <div class="btn-group" style="margin-top:12px;">
+            <button class="btn btn-ghost" id="copyJsonBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+              </svg>
+              Copy JSON
+            </button>
+            <button class="btn btn-ghost" id="importJsonBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>
+              </svg>
+              Import JSON
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <span class="toast-icon" id="toastIcon"></span>
+    <span id="toastText"></span>
+  </div>
+
+  <!-- Hidden file input for import -->
+  <input type="file" id="importFileInput" accept=".json" style="display:none;">
+
+  <script src="providers.js"></script>
+  <script src="settings.js"></script>
+</body>
+</html>
